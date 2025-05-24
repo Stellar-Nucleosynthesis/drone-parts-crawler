@@ -1,4 +1,3 @@
-import pandas as pd
 from bs4 import BeautifulSoup
 
 from website_parsers import generic_parser
