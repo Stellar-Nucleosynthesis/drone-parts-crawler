@@ -7,3 +7,4 @@ result = parser.parse()
 for detail, df in result.items():
     print("Detail:", detail)
     print(df.to_string(), '\n')
+

@@ -9,6 +9,9 @@ detail_paths = {
     "VTX" : "/komplektuiuchi/videoperedavachi",
     "RX" : "/komplektuiuchi/radioperedavachi",
     "Antenna" : "/komplektuiuchi/anteny",
+    "Battery" : "/aksesuary/batarei",
+    "Motor" : "/komplektuiuchi/motory",
+    "Stack" : "/komplektuiuchi/polotni-kontrolery",
 }
 
 def detail_url_finder(sell_page):
@@ -148,3 +151,58 @@ antenna["polarization"] = lambda text : res if (res := find_attr(text, ["Пол�
 antenna["swr"] = lambda text : find_attr(text, ["Коефіцієнт стоячої хвилі (S.W.R.)"])
 antenna["antenna_type"] = lambda text : "UNDEFINED"
 attr_parsers["Antenna"] = antenna
+
+battery = dict()
+def find_battery_discharge(text):
+    res = find_attr(text, ["Номінальний струм розряду", "Максимальний струм розряду"])
+    if res:
+        return res
+    res = re.findall(r'\b\d+C\b', find_detail_name(text))
+    if res:
+        return ", ".join(res)
+    return None
+
+battery["model"] = find_detail_model
+battery["manufacturer"] = find_detail_manufacturer
+battery["mass"] = lambda text : find_attr(text, ["Вага"])
+battery["size_mm"] = lambda text : find_attr(text, ["Розмір"])
+battery["num_s"] = lambda text : find_attr(text, ["Кількість банок"])
+battery["discharge_current"] = find_battery_discharge
+battery["battery_type"] = lambda text : find_attr(text, ["Тип акумулятора"])
+battery["capacity"] = lambda text : find_attr(text, ["Номінальна ємність"])
+battery["cable_connector"] = lambda text : find_attr(text, ["Тип розʼєму"])
+attr_parsers["Battery"] = battery
+
+motor = dict()
+def find_rotation_speed(text):
+    res = find_attr(text, ["KV"])
+    if res:
+        return res
+    res = re.findall(r'\b\d+KV\b', find_detail_name(text))
+    if res:
+        return ", ".join(res)
+    return None
+
+motor["model"] = find_detail_model
+motor["manufacturer"] = find_detail_manufacturer
+motor["mass"] = lambda text : find_attr(text, ["Вага (з дротом)"])
+motor["size_mm"] = lambda text : find_attr(text, ["Розмір (В * Ш)"])
+motor["mount_size"] = lambda text : "UNDEFINED"
+motor["rotation_speed"] = find_rotation_speed
+motor["num_s"] = lambda text : find_attr(text, ["Напруга", "Рекомендована батарея"])
+motor["max_current"] = lambda text : find_attr(text, ["Максимальний струм"])
+motor["max_power"] = lambda text : find_attr(text, ["Максимальна потужність"])
+attr_parsers["Motor"] = motor
+
+stack = dict()
+
+stack["model"] = lambda text : x if "Stack" in (x := find_detail_model(text)) else None
+stack["manufacturer"] = find_detail_manufacturer
+stack["mass"] = lambda text : find_attr(text, ["Вага"])
+stack["size_mm"] = lambda text : find_attr(text, ["Розмір"])
+stack["mount_size"] = lambda text : find_attr(text, ["Отвори для кріплення"])
+stack["cable_connector"] = lambda text : find_attr(text, ["Кабель живлення"])
+stack["working_current"] = lambda text : find_attr(text, ["Постійний струм"])
+stack["max_current"] = lambda text : find_attr(text, ["Піковий струм"])
+stack["range_s"] = lambda text : find_attr(text, ["Вхідна напруга"])
+attr_parsers["Stack"] = stack
