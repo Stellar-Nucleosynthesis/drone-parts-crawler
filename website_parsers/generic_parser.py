@@ -5,13 +5,14 @@ from drone_parts import details_info
 
 
 class MarketplaceParser:
-    def __init__(self, url, detail_paths, product_url_parser, attribute_parsers):
+    def __init__(self, url, detail_paths, detail_url_finder, attribute_parsers):
         self.url = url
         self.detail_paths = detail_paths
-        self.product_url_parser = product_url_parser
+        self.detail_url_finder = detail_url_finder
         self.attribute_parsers = attribute_parsers
 
-    def __get_page__(self, url):
+    @staticmethod
+    def __get_page__(url):
         headers = {"User-Agent": "Mozilla/5.0"}
         return requests.get(url, headers=headers)
 
@@ -19,7 +20,7 @@ class MarketplaceParser:
         details_sell_pages = {}
         for detail, path in self.detail_paths.items():
             pages = []
-            for page_num in range(10):
+            for page_num in range(1, 10):
                 page_url = self.url + path + "?page=%d" % page_num
                 print(page_url)
                 page = self.__get_page__(page_url)
@@ -28,14 +29,14 @@ class MarketplaceParser:
                 pages.append(page)
             details_sell_pages[detail] = pages
 
-        detail_url_list = {}
+        detail_url_lists = {}
         for detail, sell_pages in details_sell_pages.items():
             detail_urls = []
             for sell_page in sell_pages:
-                detail_urls.extend(self.product_url_parser(sell_page))
-            detail_url_list[detail] = detail_urls
+                detail_urls.extend(self.detail_url_finder(sell_page))
+            detail_url_lists[detail] = detail_urls
 
-        return detail_url_list
+        return detail_url_lists
 
     def __get_detail_characteristics__(self, detail, detail_url):
         detail_page = self.__get_page__(detail_url)
@@ -44,7 +45,7 @@ class MarketplaceParser:
 
         detail_chars = {}
         for attribute in details_info.details_list[detail]:
-            attr_parser = self.attribute_parsers[attribute]
+            attr_parser = self.attribute_parsers[detail][attribute]
             value = attr_parser(detail_page)
             if not value:
                 print("Couldn't find %s in " % attribute, detail_url)
@@ -62,7 +63,7 @@ class MarketplaceParser:
             for detail_url in detail_url_lists[detail]:
                 print("Looking up %s" % detail_url)
                 detail_chars = self.__get_detail_characteristics__(detail, detail_url)
-                if detail_chars == None:
+                if not detail_chars:
                     continue
                 details.loc[len(details)] = detail_chars
             result[detail] = details
