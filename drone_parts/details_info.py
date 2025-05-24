@@ -14,5 +14,13 @@ details_list = {
     "VTX": [
         "model", "manufacturer", "connector", "max_power",
         "video_format", "mass", "size_mm", "frequency"
+    ],
+    "RX": [
+        "model", "manufacturer", "mass",
+        "size_mm", "frequency", "protocol"
+    ],
+    "Antenna": [
+        "model", "manufacturer", "connector", "mass",
+        "size_mm", "frequency", "dbi", "polarization", "swr", "antenna_type"
     ]
 }
