@@ -1,7 +1,9 @@
 from bs4 import BeautifulSoup
+from normalization import frame, propeller, camera, vtx, rx, antenna, battery, motor, stack
 import re
 
 url = "https://fpvua.com"
+
 detail_paths = {
     "Frame" : "/komplektuiuchi/ramy",
     "Propeller" : "/komplektuiuchi/propelery",
@@ -12,6 +14,18 @@ detail_paths = {
     "Battery" : "/aksesuary/batarei",
     "Motor" : "/komplektuiuchi/motory",
     "Stack" : "/komplektuiuchi/polotni-kontrolery",
+}
+
+normalizers = {
+    "Frame" : frame.normalize,
+    "Propeller" : propeller.normalize,
+    "Camera" : camera.normalize,
+    "VTX" : vtx.normalize,
+    "RX" : rx.normalize,
+    "Antenna" : antenna.normalize,
+    "Battery" : battery.normalize,
+    "Motor" : motor.normalize,
+    "Stack" : stack.normalize,
 }
 
 def detail_url_finder(sell_page):
@@ -45,8 +59,8 @@ def find_detail_model(page):
 
 def find_detail_manufacturer(page):
     res = find_attr(page, ["Виробник"])
-    if res:
-        return res
+    if res and res.strip():
+        return res.strip()
     soup = BeautifulSoup(page.text, "html.parser")
     for li in soup.find_all("li"):
         span = li.find("span")
@@ -54,7 +68,7 @@ def find_detail_manufacturer(page):
             p = li.find("p")
             if p:
                 a = p.find("a")
-                if a:
+                if a and a.text.strip():
                     return a.text.strip()
     return None
 
@@ -83,12 +97,13 @@ camera["model"] = find_detail_model
 camera["manufacturer"] = find_detail_manufacturer
 camera["mass"] = lambda text : find_attr(text, ["Вага"])
 camera["size_mm"] = lambda text : find_attr(text, ["Розмір"])
+camera["mount_size"] = lambda text : "UNDEFINED"
 camera["tvl"] = lambda text : find_attr(text, ["Горизонтальна роздільна здатність"])
 camera["aspect_ratio"] = lambda text : find_attr(text, ["Співвідношення сторін"])
 camera["video_format"] = lambda text : find_attr(text, ["Система сигналу"])
 attr_parsers["Camera"] = camera
 
-vtx = {}
+vtx = dict()
 def find_vtx_power(text):
     res = find_attr(text, ["Вихідна потужність"])
     if res:
@@ -119,6 +134,9 @@ def find_rx_frequency(text):
     res = re.findall(r'\b[\d.]+(?:M|G|MHz|GHz)\b', find_detail_name(text))
     if res:
         return ", ".join(res)
+    res = re.findall(r'\b[\d.]+(?:M|G|MHz|GHz)\b', find_detail_model(text))
+    if res:
+        return ", ".join(res)
     return None
 
 def find_rx_protocol(text):
@@ -147,7 +165,7 @@ antenna["mass"] = lambda text : find_attr(text, ["Вага антени"])
 antenna["size_mm"] = lambda text : find_attr(text, ["Довжина антени", "Розмір", "Розмір антени", "Розміри"])
 antenna["frequency"] = lambda text : find_attr(text, ["Центральна частота", "Робоча частота", "Діапазон частот"])
 antenna["dbi"] = lambda text : find_attr(text, ["Коефіцієнт підсилення"])
-antenna["polarization"] = lambda text : res if (res := find_attr(text, ["Поляризація"])) else "-"
+antenna["polarization"] = lambda text : find_attr(text, ["Поляризація"])
 antenna["swr"] = lambda text : find_attr(text, ["Коефіцієнт стоячої хвилі (S.W.R.)"])
 antenna["antenna_type"] = lambda text : "UNDEFINED"
 attr_parsers["Antenna"] = antenna
@@ -195,8 +213,7 @@ motor["max_power"] = lambda text : find_attr(text, ["Максимальна по
 attr_parsers["Motor"] = motor
 
 stack = dict()
-
-stack["model"] = lambda text : x if "Stack" in (x := find_detail_model(text)) else None
+stack["model"] = lambda text : find_detail_model(text)
 stack["manufacturer"] = find_detail_manufacturer
 stack["mass"] = lambda text : find_attr(text, ["Вага"])
 stack["size_mm"] = lambda text : find_attr(text, ["Розмір"])

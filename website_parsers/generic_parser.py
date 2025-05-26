@@ -5,11 +5,12 @@ from drone_parts import details_info
 
 
 class MarketplaceParser:
-    def __init__(self, url, detail_paths, detail_url_finder, attribute_parsers):
+    def __init__(self, url, detail_paths, detail_url_finder, attribute_parsers, normalizers):
         self.url = url
         self.detail_paths = detail_paths
         self.detail_url_finder = detail_url_finder
         self.attribute_parsers = attribute_parsers
+        self.normalizers = normalizers
 
     @staticmethod
     def __get_page__(url):
@@ -46,11 +47,7 @@ class MarketplaceParser:
         detail_chars = {}
         for attribute in details_info.details_list[detail]:
             attr_parser = self.attribute_parsers[detail][attribute]
-            value = attr_parser(detail_page)
-            if not value:
-                print("Couldn't find %s in " % attribute, detail_url)
-                return None
-            detail_chars[attribute] = value
+            detail_chars[attribute] = attr_parser(detail_page)
         return detail_chars
 
     def parse(self):
@@ -66,5 +63,7 @@ class MarketplaceParser:
                 if not detail_chars:
                     continue
                 details.loc[len(details)] = detail_chars
-            result[detail] = details
+
+            result[detail] = self.normalizers[detail](details)
+
         return result
