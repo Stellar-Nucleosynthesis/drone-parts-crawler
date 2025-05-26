@@ -72,6 +72,15 @@ def find_detail_manufacturer(page):
                     return a.text.strip()
     return None
 
+def find_photo_link(page):
+    try:
+        soup = BeautifulSoup(page.text, "html.parser")
+        container = soup.find("div", class_="swiper-slide")
+        img = container.find("img", recursive=True)
+        return img.get("data-src")
+    except AttributeError:
+        return None
+
 attr_parsers = {}
 
 frame = dict()
@@ -83,13 +92,15 @@ frame["material"] = lambda text: find_attr(text, ["Матеріал"])
 frame["size_mm"] = lambda text: find_attr(text, ["Розмір рами", "Розмір (діагональ між центрами моторів)"])
 frame["cam_mount_size"] = lambda text: find_attr(text, ["Розмір кріплення камери"])
 frame["motor_mount_size"] = lambda text: find_attr(text, ["Отвір для кріплення двигуна"])
+frame["photo_link"] = find_photo_link
 attr_parsers["Frame"] = frame
 
 prop = dict()
 prop["model"] = find_detail_model
 prop["manufacturer"] = find_detail_manufacturer
 prop["material"] = lambda text: find_attr(text, ["Матеріал"])
-prop["propeller_size"] = lambda text: find_attr(text, ["Розмір пропелера", "Розмір"])
+prop["size_inches"] = lambda text: find_attr(text, ["Розмір пропелера", "Розмір"])
+prop["photo_link"] = find_photo_link
 attr_parsers["Propeller"] = prop
 
 camera = dict()
@@ -101,6 +112,7 @@ camera["mount_size"] = lambda text : "UNDEFINED"
 camera["tvl"] = lambda text : find_attr(text, ["Горизонтальна роздільна здатність"])
 camera["aspect_ratio"] = lambda text : find_attr(text, ["Співвідношення сторін"])
 camera["video_format"] = lambda text : find_attr(text, ["Система сигналу"])
+camera["photo_link"] = find_photo_link
 attr_parsers["Camera"] = camera
 
 vtx = dict()
@@ -124,6 +136,7 @@ vtx["video_format"] = lambda text : find_attr(text, ["Відеоформат"])
 vtx["mass"] = lambda text : find_attr(text, ["Вага"])
 vtx["size_mm"] = lambda text : find_attr(text, ["Розмір"])
 vtx["frequency"] = find_vtx_frequency
+vtx["photo_link"] = find_photo_link
 attr_parsers["VTX"] = vtx
 
 rx = {}
@@ -155,6 +168,7 @@ rx["mass"] = lambda text : find_attr(text, ["Вага"])
 rx["size_mm"] = lambda text : find_attr(text, ["Розмір", "Розміри"])
 rx["frequency"] = find_rx_frequency
 rx["protocol"] = find_rx_protocol
+rx["photo_link"] = find_photo_link
 attr_parsers["RX"] = rx
 
 antenna = dict()
@@ -168,6 +182,7 @@ antenna["dbi"] = lambda text : find_attr(text, ["Коефіцієнт підси
 antenna["polarization"] = lambda text : find_attr(text, ["Поляризація"])
 antenna["swr"] = lambda text : find_attr(text, ["Коефіцієнт стоячої хвилі (S.W.R.)"])
 antenna["antenna_type"] = lambda text : "UNDEFINED"
+antenna["photo_link"] = find_photo_link
 attr_parsers["Antenna"] = antenna
 
 battery = dict()
@@ -185,10 +200,11 @@ battery["manufacturer"] = find_detail_manufacturer
 battery["mass"] = lambda text : find_attr(text, ["Вага"])
 battery["size_mm"] = lambda text : find_attr(text, ["Розмір"])
 battery["num_s"] = lambda text : find_attr(text, ["Кількість банок"])
-battery["discharge_current"] = find_battery_discharge
+battery["discharge_rate"] = find_battery_discharge
 battery["battery_type"] = lambda text : find_attr(text, ["Тип акумулятора"])
 battery["capacity"] = lambda text : find_attr(text, ["Номінальна ємність"])
 battery["cable_connector"] = lambda text : find_attr(text, ["Тип розʼєму"])
+battery["photo_link"] = find_photo_link
 attr_parsers["Battery"] = battery
 
 motor = dict()
@@ -207,9 +223,10 @@ motor["mass"] = lambda text : find_attr(text, ["Вага (з дротом)"])
 motor["size_mm"] = lambda text : find_attr(text, ["Розмір (В * Ш)"])
 motor["mount_size"] = lambda text : "UNDEFINED"
 motor["rotation_speed"] = find_rotation_speed
-motor["num_s"] = lambda text : find_attr(text, ["Напруга", "Рекомендована батарея"])
+motor["range_s"] = lambda text : find_attr(text, ["Напруга", "Рекомендована батарея"])
 motor["max_current"] = lambda text : find_attr(text, ["Максимальний струм"])
 motor["max_power"] = lambda text : find_attr(text, ["Максимальна потужність"])
+motor["photo_link"] = find_photo_link
 attr_parsers["Motor"] = motor
 
 stack = dict()
@@ -222,4 +239,5 @@ stack["cable_connector"] = lambda text : find_attr(text, ["Кабель живл
 stack["working_current"] = lambda text : find_attr(text, ["Постійний струм"])
 stack["max_current"] = lambda text : find_attr(text, ["Піковий струм"])
 stack["range_s"] = lambda text : find_attr(text, ["Вхідна напруга"])
+stack["photo_link"] = find_photo_link
 attr_parsers["Stack"] = stack

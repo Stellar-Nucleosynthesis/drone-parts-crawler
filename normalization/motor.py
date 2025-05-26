@@ -21,7 +21,14 @@ def __get_power(s):
 def normalize(df):
     utils.normalize_mass_size(df)
     df.loc[:, "rotation_speed"] = df["rotation_speed"].apply(__get_rotation_speed)
-    df.loc[:, "num_s"] = df["num_s"].apply(utils.get_num_serial_cells)
+    df.loc[:, "range_s"] = df["range_s"].apply(utils.get_num_serial_cells)
     df.loc[:, "max_current"] = df["max_current"].apply(utils.get_current)
     df.loc[:, "max_power"] = df["max_power"].apply(__get_power)
+    df = df.dropna(subset=["model"])
+    df = df.dropna(subset=["mount_size"])
+    df = df.dropna(subset=["rotation_speed"])
+    df = df.dropna(subset=["range_s"])
+    df = df.dropna(subset=["max_current"])
+    df = df.dropna(subset=["max_power"])
+    df.reset_index(drop=True, inplace=True)
     return df

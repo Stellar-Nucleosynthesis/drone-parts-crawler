@@ -27,6 +27,9 @@ def normalize(df):
     df.loc[:, "mount_size"] = df["size_mm"].apply(__get_camera_mount)
     df.loc[:, "aspect_ratio"] = df["aspect_ratio"].apply(__get_aspect_ratio)
     df.loc[:, "video_format"] = df["video_format"].apply(utils.get_video_format)
+    df = df.dropna(subset=["model"])
+    df = df.dropna(subset=["mount_size"])
+    df = df.dropna(subset=["aspect_ratio"])
     df = df.dropna(subset=["video_format"])
     df.reset_index(drop=True, inplace=True)
     return df

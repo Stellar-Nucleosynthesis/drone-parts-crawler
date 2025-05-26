@@ -40,7 +40,6 @@ def __get_antenna_type(freq):
         return ','.join(set(res))
     return None
 
-
 def normalize(df):
     utils.normalize_mass_size(df)
     df.loc[:, "frequency"] = df["frequency"].apply(utils.get_frequency)
@@ -48,7 +47,9 @@ def normalize(df):
     df.loc[:, "polarization"] = df["polarization"].apply(__get_polarization)
     df.loc[:, "swr"] = df["swr"].apply(__get_swr)
     df.loc[:, "antenna_type"] = df["frequency"].apply(__get_antenna_type)
+    df = df.dropna(subset=["model"])
+    df = df.dropna(subset=["connector"])
     df = df.dropna(subset=["frequency"])
-    df = df[~df["model"].str.contains("Цифрова Система", na=False)]
+    df = df.dropna(subset=["antenna_type"])
     df.reset_index(drop=True, inplace=True)
     return df
