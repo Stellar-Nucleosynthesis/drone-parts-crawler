@@ -1,10 +1,9 @@
 import requests
 import pandas as pd
+from details_parsing import details_info
 
-from drone_parts import details_info
 
-
-class MarketplaceParser:
+class DetailsParser:
     def __init__(self, url, detail_paths, detail_url_finder, attribute_parsers, normalizers):
         self.url = url
         self.detail_paths = detail_paths

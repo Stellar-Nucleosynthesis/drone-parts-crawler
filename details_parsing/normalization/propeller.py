@@ -1,4 +1,4 @@
-from normalization import utils
+from details_parsing.normalization import utils
 
 def normalize(df):
     df.loc[:, "size_inches"] = df["size_inches"].apply(utils.get_len_inches)

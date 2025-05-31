@@ -1,4 +1,4 @@
-from normalization import utils
+from details_parsing.normalization import utils
 
 def normalize(df):
     utils.normalize_mass_size(df)

@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from normalization import frame, propeller, camera, vtx, rx, antenna, battery, motor, stack
+from details_parsing.normalization import vtx, battery, propeller, antenna, motor, camera, frame, rx, stack
 import re
 
 url = "https://fpvua.com"
@@ -52,9 +52,9 @@ def find_detail_name(page):
         return None
 
 def find_detail_model(page):
-    res = find_attr(page, ["Модель"])
-    if res:
-        return res
+    # res = find_attr(page, ["Модель"])
+    # if res:
+    #     return res
     return find_detail_name(page)
 
 def find_detail_manufacturer(page):

@@ -1,6 +1,6 @@
 import re
 import numpy as np
-from normalization import utils
+from details_parsing.normalization import utils
 
 def __get_discharge_rate(s):
     if not s or s is None or s is np.nan:

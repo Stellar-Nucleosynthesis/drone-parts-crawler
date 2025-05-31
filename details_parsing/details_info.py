@@ -36,3 +36,15 @@ details_list = {
         "working_current", "max_current", "range_s", "photo_link"
     ]
 }
+
+detail_id_names = {
+    "Frame": "frame_id",
+    "Propeller": "propeller_id",
+    "Camera": "camera_id",
+    "VTX": "vtx_id",
+    "RX": "rx_id",
+    "Antenna": "antenna_id",
+    "Battery": "battery_id",
+    "Motor": "motor_id",
+    "Stack": "stack_id"
+}
