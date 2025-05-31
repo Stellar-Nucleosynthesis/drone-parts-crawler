@@ -22,7 +22,8 @@ def save_details_dfs(details_dfs):
 
 def parse_distributors(module, details_dfs):
     dist_parser = distributor_parser.DistributorsParser(
-        module.search_detail, module.find_product_name, module.find_sale_info)
+        module.search_detail, module.find_product_name, module.find_sale_info,
+        max_processed_results=5)
     res = dist_parser.parse(details_dfs)
     object_save.save_to_pickle(res, "scan_results/distributors.pickle")
 
@@ -37,6 +38,10 @@ parse_details(fpvua_det)
 details = load_details_dfs()
 parse_distributors(fpvua_dist, details)
 distributors = load_distributors_dfs()
+
+for detail, df in distributors.items():
+    print("Detail:", detail)
+    print(df.to_string(), '\n')
 
 db_save.update_details_in_db("scan_results/database.db", details)
 db_save.insert_distributor_info("scan_results/database.db", distributors)

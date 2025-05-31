@@ -5,11 +5,12 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 class DistributorsParser:
-    def __init__(self, search_detail, find_product_name, find_sale_info, min_similarity=0.9):
+    def __init__(self, search_detail, find_product_name, find_sale_info, min_similarity=0.7, max_processed_results=10):
         self.search_detail = search_detail
         self.find_product_name = find_product_name
         self.find_sale_info = find_sale_info
         self.min_similarity = min_similarity
+        self.max_processed_results = max_processed_results
 
     @staticmethod
     def __find_similarity(text1, text2):
@@ -33,11 +34,12 @@ class DistributorsParser:
                     "price",
                     "is_available",
                 ])
-                for url in urls_list:
+                for url in urls_list[:self.max_processed_results]:
                     page = requests.get(url, headers=headers)
                     product_name = self.find_product_name(page)
                     similarity = self.__find_similarity(model, product_name)
                     if similarity >= self.min_similarity:
+                        print("Found the detail %s on page %s" % (model, url))
                         (store_name, price, is_available) = self.find_sale_info(page)
                         model_sale_info.loc[len(model_sale_info)] = \
                             [store_name, url, price, is_available]
